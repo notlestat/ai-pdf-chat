@@ -1,0 +1,5 @@
+anthropic>=0.120,<1.0
+streamlit>=1.60,<2.0
+pypdf>=6.0,<7.0
+python-dotenv>=1.0,<2.0
+truststore>=0.10,<1.0
