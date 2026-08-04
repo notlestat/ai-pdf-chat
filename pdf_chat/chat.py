@@ -157,9 +157,11 @@ class Conversation:
                 yield chunk
             final = stream.get_final_message()
 
-        # Echo the response back verbatim, including thinking blocks — the API
-        # expects them unchanged when the conversation continues on the same model.
-        self._messages.append({"role": "assistant", "content": final.content})
+        # Echo the response back into history so the model keeps its own context,
+        # including thinking blocks, which must survive unchanged.
+        self._messages.append(
+            {"role": "assistant", "content": _for_history(final.content)}
+        )
 
         answer.citations = _citations(final.content)
         answer.reasoning = _reasoning(final.content)
@@ -169,6 +171,44 @@ class Conversation:
     @property
     def total_cost(self) -> float:
         return sum(a.usage.cost for a in self.answers if a.usage)
+
+
+def _for_history(content: list[Any]) -> list[dict[str, Any]]:
+    """Convert a response back into blocks the API will accept as input.
+
+    Response and request shapes are not symmetric, and every mismatch here shows
+    up on the *second* question rather than the first:
+
+    1. Citations are output metadata, not input. They carry a `file_id` and
+       positional `document_index` values that the API re-validates against the
+       documents in the request, and they do not survive the round trip
+       ("Invalid citation indices", "Extra inputs are not permitted"). We keep
+       them for display and drop them from history — the answer text is the
+       context the model actually needs.
+    2. With citations on, the reply is split into cited and uncited segments and
+       the trailing one is often empty. The API emits those but refuses them as
+       input ("text content blocks must be non-empty").
+
+    Everything else passes through untouched — thinking blocks in particular
+    must keep their signatures.
+    """
+    blocks: list[dict[str, Any]] = []
+
+    for block in content:
+        data = (
+            block.model_dump(exclude_none=True)
+            if hasattr(block, "model_dump")
+            else dict(block)
+        )
+
+        if data.get("type") == "text":
+            if not (data.get("text") or "").strip():
+                continue
+            data.pop("citations", None)
+
+        blocks.append(data)
+
+    return blocks
 
 
 def _citations(content: list[Any]) -> list[Citation]:
