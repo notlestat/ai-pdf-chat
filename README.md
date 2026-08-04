@@ -5,7 +5,7 @@ Upload a PDF, ask questions in plain English, get answers **with the page number
 Built for documents people are accountable for — contracts, employee handbooks, policies,
 technical manuals, research papers — where a confidently wrong answer is worse than no answer.
 
-```
+```javascript
 Upload PDF ──▶ Files API (uploaded once)
                     │
                     ▼
@@ -28,15 +28,15 @@ them, store them in a vector database, and retrieve the top few chunks for each 
 This app doesn't do that. It sends the entire PDF to the model on every conversation. That is a
 deliberate trade, and here is the reasoning:
 
-| | Whole document (this app) | Chunk + vector search |
-|---|---|---|
-| "When does this contract expire?" | Reads all 200 pages, finds it | Works **if** the clause lands in the top-k results |
-| "Summarise section 4" | Reliable | Weak — chunking destroys document structure |
-| Facts spread across several sections | Reliable | Frequently misses |
-| Citations | Exact page numbers, built into the API | You build it yourself, chunk-level |
-| Infrastructure | None | Vector DB to run, re-index, and back up |
-| Cost per follow-up question | ~10–20¢ | ~2–3¢ |
-| Cost to load a 200-page contract | ~$2–3, once per session | Pennies |
+|                                      | Whole document (this app)              | Chunk + vector search                              |
+| ------------------------------------ | -------------------------------------- | -------------------------------------------------- |
+| "When does this contract expire?"    | Reads all 200 pages, finds it          | Works **if** the clause lands in the top-k results |
+| "Summarise section 4"                | Reliable                               | Weak — chunking destroys document structure        |
+| Facts spread across several sections | Reliable                               | Frequently misses                                  |
+| Citations                            | Exact page numbers, built into the API | You build it yourself, chunk-level                 |
+| Infrastructure                       | None                                   | Vector DB to run, re-index, and back up            |
+| Cost per follow-up question          | \~10–20¢                               | \~2–3¢                                             |
+| Cost to load a 200-page contract     | \~$2–3, once per session               | Pennies                                            |
 
 **RAG is genuinely cheaper. Whole-document reading is genuinely more correct.**
 
@@ -74,7 +74,7 @@ The sidebar shows this happening live — token counts, cache hits, and running 
 ## Quickstart
 
 ```bash
-git clone https://github.com/<your-username>/ai-pdf-chat.git
+git clone https://github.com/notlestat/ai-pdf-chat.git
 cd ai-pdf-chat
 
 # uv (recommended)
@@ -103,7 +103,7 @@ streamlit run app.py
 
 ## Project layout
 
-```
+```javascript
 app.py                 Streamlit UI — upload, chat, sources, cost panel
 pdf_chat/
 ├── client.py          API client + the TLS fix described below
