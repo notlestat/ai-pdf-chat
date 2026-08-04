@@ -1,0 +1,9 @@
+# Never apply line-ending conversion to binaries — it corrupts them.
+*.pdf binary
+*.png binary
+*.gif binary
+
+# Normalise text to LF in the repo, checkout native on Windows.
+*.py text
+*.md text
+*.txt text
